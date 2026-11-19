@@ -35,9 +35,9 @@ export default function Report({ analysis, go }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    getTranscript()
+    getTranscript(5, 1000)
       .then(setText)
-      .catch(() => setError("Couldn't reach the backend. Is server.py running in the backend folder?"));
+      .catch(() => setError("Couldn't reach the backend or transcript not found. Is server.py running in the backend folder?"));
   }, []);
 
   const stats = useMemo(() => {
