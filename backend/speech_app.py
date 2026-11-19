@@ -17,7 +17,7 @@ def check_audio_file(file_path):
     return True
 
 
-def transcribe_audio(model, file_path, output_file="transcript.txt"):
+def transcribe_audio(model, file_path, output_file="uploads/transcript.txt"):
     print("converting audio")
     segments, info = model.transcribe(file_path)
 
@@ -29,7 +29,7 @@ def transcribe_audio(model, file_path, output_file="transcript.txt"):
         full_text = full_text + segment.text + " "
 
     full_text = full_text.strip()
-
+    
     with open(output_file, "w", encoding="utf-8") as file:
         file.write(full_text)
     print("Saved transcript to", output_file)

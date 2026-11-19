@@ -14,6 +14,7 @@ export default function Record({ onDone }) {
   const [secs, setSecs] = useState(0);
   const [bars, setBars] = useState(() => Array(BAR_COUNT).fill(8));
   const [nudges, setNudges] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Turn on camera + mic, and hook the mic up to a volume meter.
   useEffect(() => {
@@ -70,7 +71,7 @@ export default function Record({ onDone }) {
     rec.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
     rec.onstop = () => {
       const blob = new Blob(chunksRef.current, { type: rec.mimeType || "video/webm" });
-      onDone(URL.createObjectURL(blob));
+      uploadToBackend(blob); // Upload the recorded file to the backend
     };
     rec.start();
     recorderRef.current = rec;
@@ -83,9 +84,40 @@ export default function Record({ onDone }) {
     setRecording(false);
   }
 
+  async function uploadToBackend(file) {
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append("file", file, "recording.webm");
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.error}`);
+        setIsUploading(false);
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Transcript:", data.text);
+      onDone(data.text); // Pass the transcript to the parent component
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      alert("Error uploading file. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
   function upload(e) {
     const file = e.target.files?.[0];
-    if (file) onDone(URL.createObjectURL(file));
+    if (file) {
+      uploadToBackend(file); // Upload the selected file to the backend
+    }
   }
 
   const time = `${String(Math.floor(secs / 60)).padStart(2, "0")}:${String(secs % 60).padStart(2, "0")}`;
@@ -121,7 +153,7 @@ export default function Record({ onDone }) {
                 <span className="dot dot-square" /> Done, roast me
               </button>
             ) : (
-              <button type="button" className="btn-big btn-lime" onClick={start} disabled={!!camError}>
+              <button type="button" className="btn-big btn-lime" onClick={start} disabled={!!camError || isUploading}>
                 <span className="dot" /> Start talking
               </button>
             )}
