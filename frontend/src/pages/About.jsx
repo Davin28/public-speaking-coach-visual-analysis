@@ -1,10 +1,10 @@
 // About page: the team and the class. Has its own violet theme (see .theme-about in index.css).
 const TEAM = [
-  { name: "Jesse Bloom", roles: ["Project manager", "Full stack"], color: "lime" },
+  { name: "Jesse Bloom", roles: ["Project manager", "Backend"], color: "lime" },
   { name: "David Landivar", roles: ["Backend"], color: "ink" },
   { name: "Meaghan Knowles", roles: ["Frontend"], color: "coral" },
-  { name: "NJ Lacambra", roles: ["Frontend"], color: "cream" },
-  { name: "Justin Ming", roles: ["Backend"], color: "ink" },
+  { name: "NJ Lacambra", roles: ["Full stack"], color: "cream" },
+  { name: "Justin Ming", roles: ["Full stack"], color: "ink" },
 ];
 
 const ANALYZERS = [

@@ -1,0 +1,17 @@
+# Python environments
+.venv/
+venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Recordings and generated output (every run makes new ones)
+backend/uploads/
+visual_results.json
+speech_report.txt
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.vscode/

@@ -5,7 +5,7 @@ import Results from "./pages/Results.jsx";
 import Report from "./pages/Report.jsx";
 import Replay from "./pages/Replay.jsx";
 import About from "./pages/About.jsx";
-import { mockAnalysis } from "./mockAnalysis.js";
+import { buildResults } from "./buildResults.js";
 
 const PAGES = [
   { id: "record", label: "Practice", icon: "M9 2h6v12H9zM5 10a7 7 0 0 0 14 0M12 17v5" },
@@ -28,13 +28,21 @@ export default function App() {
     window.scrollTo(0, 0);
   }, [page]);
   const [videoUrl, setVideoUrl] = useState(null);
-  // Swap this for the real /analyze response once the backend has it.
-  const analysis = mockAnalysis;
+  const [transcript, setTranscript] = useState(null); // { text, words, duration } from POST /upload
+  const [results, setResults] = useState(null); // built from the real recording
+
 
   const light = LIGHT_PAGES.includes(page);
 
-  function handleRecordingDone(url) {
-    setVideoUrl(url);
+  function handleRecordingDone({ videoUrl, transcript, volume }) {
+    setVideoUrl(videoUrl);
+    setTranscript(transcript);
+    // Compare against the last run (saved in this browser) for the "+N since last time" chip.
+    let prevScore = null;
+    try { prevScore = JSON.parse(localStorage.getItem("sayless:lastScore")); } catch { /* storage blocked */ }
+    const built = buildResults(transcript, volume, prevScore);
+    try { localStorage.setItem("sayless:lastScore", JSON.stringify(built.overall.score)); } catch { /* storage blocked */ }
+    setResults(built);
     setPage("results");
   }
 
@@ -64,9 +72,9 @@ export default function App() {
 
       <main className="page">
         {page === "record" && <Record onDone={handleRecordingDone} />}
-        {page === "results" && <Results analysis={analysis} go={setPage} />}
-        {page === "report" && <Report analysis={analysis} go={setPage} />}
-        {page === "replay" && <Replay analysis={analysis} videoUrl={videoUrl} go={setPage} />}
+        {page === "results" && <Results results={results} go={setPage} />}
+        {page === "report" && <Report results={results} transcript={transcript} go={setPage} />}
+        {page === "replay" && <Replay videoUrl={videoUrl} transcript={transcript} go={setPage} />}
         {page === "about" && <About />}
       </main>
     </div>
